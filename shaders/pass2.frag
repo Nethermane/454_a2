@@ -40,15 +40,15 @@ void main()
   //
   // Store a signed value for the Laplacian; do not take its absolute
   // value.
-  vec4 lapTL = -texture(depthSampler, vec2(texCoords.x-texCoordInc.x,texCoords.y-texCoordInc.y));
-  vec4 lapTC = -texture(depthSampler, vec2(texCoords.x,texCoords.y-texCoordInc.y));
-  vec4 lapTR = -texture(depthSampler, vec2(texCoords.x+texCoordInc.x,texCoords.y-texCoordInc.y));
-  vec4 lapCL = -texture(depthSampler, vec2(texCoords.x-texCoordInc.x,texCoords));
-  vec4 lapCC = 8.0 * texture(depthSampler, texCoords);
-  vec4 lapCR = -texture(depthSampler, vec2(texCoords.x+texCoordInc.x,texCoords.y));
-  vec4 lapBL = -texture(depthSampler, vec2(texCoords.x-texCoordInc.x,texCoords.y+texCoordInc.y));
-  vec4 lapBC = -texture(depthSampler, vec2(texCoords.x,texCoords.y+texCoordInc.y));
-  vec4 lapBR = -texture(depthSampler, vec2(texCoords.x+texCoordInc.x,texCoords.y+texCoordInc.y));
-  vec4 color = lapTL + lapTC + lapTR + lapCL + lapCC + lapCR + lapBL + lapBC + lapBR;
-  fragLaplacian = color.z < 0.67 ? vec3(0.0,0.0,0.0): vec3(color.z,color.z,color.z);
+  float total = 0.0;
+  total -= texture(depthSampler, vec2(texCoords.x-texCoordInc.x,texCoords.y-texCoordInc.y)).r;
+  total -= texture(depthSampler, vec2(texCoords.x,texCoords.y-texCoordInc.y)).r;
+  total -= texture(depthSampler, vec2(texCoords.x+texCoordInc.x,texCoords.y-texCoordInc.y)).r;
+  total -= texture(depthSampler, vec2(texCoords.x-texCoordInc.x,texCoords)).r;
+  total += 8.0 * texture(depthSampler, texCoords).r;
+  total -= texture(depthSampler, vec2(texCoords.x+texCoordInc.x,texCoords.y)).r;
+  total -= texture(depthSampler, vec2(texCoords.x-texCoordInc.x,texCoords.y+texCoordInc.y)).r;
+  total -= texture(depthSampler, vec2(texCoords.x,texCoords.y+texCoordInc.y)).r;
+  total -= texture(depthSampler, vec2(texCoords.x+texCoordInc.x,texCoords.y+texCoordInc.y)).r;
+  fragLaplacian = total > 0.85 ? vec3(total,total,total): vec3(0.0,0.0,0.0);
 }
