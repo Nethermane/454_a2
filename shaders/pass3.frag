@@ -6,6 +6,8 @@
 
 #version 300 es
 
+precision mediump float;
+
 uniform mediump vec3 lightDir;     // direction toward the light in the VCS
 uniform mediump vec2 texCoordInc;  // texture coord difference between adjacent texels
 
@@ -29,18 +31,22 @@ void main()
 
   // [0 marks] Look up values for the depth and Laplacian.  Use only
   // the R component of the texture as texture2D( ... ).r
-
-  // YOUR CODE HERE
+  float depth = texture(depthSampler,texCoords).r;
+  float lapla = texture(laplacianSampler,texCoords).r;
 
   // [1 mark] Discard the fragment if it is a background pixel not
   // near the silhouette of the object.
 
-  // YOUR CODE HERE
+  if(lapla == 0.0 && depth == 1.0){
+    discard;
+  }
+  
 
   // [0 marks] Look up value for the colour and normal.  Use the RGB
   // components of the texture as texture2D( ... ).rgb or texture2D( ... ).xyz.
 
-  // YOUR CODE HERE
+  vec3 normal = texture(normalSampler,texCoords).xyz;
+  vec3 colour = texture(colourSampler,texCoords).rgb;
 
   // [2 marks] Compute Cel shading, in which the diffusely shaded
   // colour is quantized into four possible values.  Do not allow the
@@ -49,9 +55,20 @@ void main()
   // to have that many divisions of quanta of colour.  Do not use '3'
   // in your code; use 'numQuanta'.  Your code should be very efficient.
 
-  const int numQuanta = 3;
-
   // YOUR CODE HERE
+  const int numQuanta = 3;
+  //fragLaplacian = total > 0.85 ? vec3(total,total,total): vec3(0.0,0.0,0.0);
+
+  float diffuseIntensity = (normal.x*lightDir.x) + (normal.y*lightDir.y) + (normal.z*lightDir.z);
+  diffuseIntensity = max(diffuseIntensity, 0.2);
+
+
+  float level = min((floor(float(numQuanta)*diffuseIntensity))/(float(numQuanta-1)),1.0);
+  level = max(level, 0.2);
+  
+
+  //????
+
 
   // [2 marks] Look at the fragments in the 3x3 neighbourhood of
   // this fragment.  Your code should use the 'kernelRadius'
@@ -73,6 +90,23 @@ void main()
   const mediump float kernelRadius = 3.0;
   const mediump float threshold = -0.1;
 
+  float dist = kernelRadius;
+  float blendingFactor = -1.0;
+
+  for(int i = (-int(kernelRadius)); i <= int(kernelRadius); i++){
+    for(int j = (-int(kernelRadius)); j <= int(kernelRadius); j++){
+
+        if(texture(laplacianSampler,vec2(texCoords.x + float(i)*texCoordInc.x, texCoords.y + float(j)*texCoordInc.y)).r >= (-threshold)){
+          if(dist > sqrt(float(i*i + j*j))){
+            dist = sqrt(float(i*i + j*j));
+            blendingFactor = dist/(sqrt( float((int(kernelRadius*kernelRadius))*2) ));
+          }
+        }
+    }
+  }
+
+  
+
   // YOUR CODE HERE
 
   // [1 mark] Output the fragment colour.  If there is an edge
@@ -83,6 +117,12 @@ void main()
   // edge in the neighbourhood, output the cel-shaded colour.
   
   // YOUR CODE HERE
+  if(blendingFactor == -1.0){
+   outputColour = vec4( level*colour.x, level*colour.y, level*colour.z, 1.0 );
+  }
+  else{
+    outputColour = vec4(mix(vec3(0.0,0.0,0.0), level*colour.xyz,blendingFactor),1.0);
+  }
 
-  outputColour = vec4( 1.0, 0.0, 1.0, 1.0 );
+  //outputColour = vec4(mix( level*colour.xyz,vec3(0.0,0.0,0.0),1.0-blendingFactor),1.0);
 }

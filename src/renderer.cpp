@@ -107,9 +107,9 @@ void Renderer::render( wfModel *obj, mat4 &M, mat4 &MV, mat4 &MVP, vec3 &lightDi
     gbuffer->DrawGBuffers();
     return;
   }
-
+  
   // Pass 3: Draw everything using data from G-Buffers
-
+  
   glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
   glClear( GL_COLOR_BUFFER_BIT );
   glDisable( GL_DEPTH_TEST );
@@ -132,4 +132,5 @@ void Renderer::render( wfModel *obj, mat4 &M, mat4 &MV, mat4 &MVP, vec3 &lightDi
   drawFullscreenQuad();
 
   pass3Prog->deactivate();
+ 
 }

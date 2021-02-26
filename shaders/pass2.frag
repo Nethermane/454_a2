@@ -4,7 +4,7 @@
 
 #version 300 es
 
-precision highp float;
+precision mediump float;
 
 // texCoordInc = the x and y differences, in texture coordinates,
 // between one texel and the next.  For a window that is 400x300, for
@@ -44,11 +44,13 @@ void main()
   total -= texture(depthSampler, vec2(texCoords.x-texCoordInc.x,texCoords.y-texCoordInc.y)).r;
   total -= texture(depthSampler, vec2(texCoords.x,texCoords.y-texCoordInc.y)).r;
   total -= texture(depthSampler, vec2(texCoords.x+texCoordInc.x,texCoords.y-texCoordInc.y)).r;
-  total -= texture(depthSampler, vec2(texCoords.x-texCoordInc.x,texCoords)).r;
+  total -= texture(depthSampler, vec2(texCoords.x-texCoordInc.x,texCoords.y)).r;
   total += 8.0 * texture(depthSampler, texCoords).r;
   total -= texture(depthSampler, vec2(texCoords.x+texCoordInc.x,texCoords.y)).r;
   total -= texture(depthSampler, vec2(texCoords.x-texCoordInc.x,texCoords.y+texCoordInc.y)).r;
   total -= texture(depthSampler, vec2(texCoords.x,texCoords.y+texCoordInc.y)).r;
   total -= texture(depthSampler, vec2(texCoords.x+texCoordInc.x,texCoords.y+texCoordInc.y)).r;
-  fragLaplacian = total > 0.85 ? vec3(total,total,total): vec3(0.0,0.0,0.0);
+  //fragLaplacian = vec3(total,total,total);
+  fragLaplacian = vec3(total,total,total);
+  //fragLaplacian = total > 0.90 ? vec3(total,total,total): vec3(0.0,0.0,0.0);
 }
